@@ -1,0 +1,50 @@
+# Enable rewrite engine
+RewriteEngine On
+RewriteBase /
+
+# Handle SPA routing
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-l
+RewriteRule . /index.html [L]
+
+# Security headers
+Header set X-Content-Type-Options "nosniff"
+Header set X-Frame-Options "DENY"
+Header set X-XSS-Protection "1; mode=block"
+Header set Referrer-Policy "strict-origin-when-cross-origin"
+Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+Header set Content-Security-Policy "default-src 'self' https://*.supabase.co; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.unsplash.com https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co;"
+
+# Enable CORS
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+# Cache control
+<FilesMatch "\.(css|js)$">
+    Header set Cache-Control "max-age=31536000, public"
+</FilesMatch>
+
+<FilesMatch "\.(jpg|jpeg|png|gif|ico)$">
+    Header set Cache-Control "max-age=31536000, public"
+</FilesMatch>
+
+<FilesMatch "\.(woff|woff2)$">
+    Header set Cache-Control "max-age=31536000, public"
+</FilesMatch>
+
+# Enable compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/json
+</IfModule>
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
